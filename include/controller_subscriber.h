@@ -4,8 +4,6 @@
 #include "ros/ros.h"
 //msg
 #include "robot_controller/aruco_msg.h"
-//cpp
-#include "mutex"
 
 
 class controller;
@@ -16,8 +14,6 @@ private:
     controller* Subject;
 
     ros::Subscriber sub;
-
-    std::unique_lock<std::mutex> lck;
 
 public:
     controller_subscriber(){}

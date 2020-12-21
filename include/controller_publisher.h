@@ -9,7 +9,6 @@ class controller_publisher
 {
 private:
     controller* Subject;
-
     ros::Publisher pub;
 
 public:

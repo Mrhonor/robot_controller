@@ -15,23 +15,12 @@ controller_publisher::controller_publisher(ros::NodeHandle &n, controller* Subje
 }
 
 void controller_publisher::PublishAll(){
-    robot_controller::aruco_msg msg_robot1, msg_robot2, msg_robot3;
-    msg_robot1.robotName = string("robot1");
-    msg_robot1.linear.x = 1;
-    msg_robot1.yaw = 0;
-
-    msg_robot2.robotName = string("robot2");
-    msg_robot2.linear.x = 1;
-    msg_robot2.yaw = 0;
-
-    msg_robot3.robotName = string("robot3");
-    msg_robot3.linear.x = 1;
-    msg_robot3.yaw = 0;
-
-    pub.publish(msg_robot1);
-    ros::Duration(0.01).sleep();
-    pub.publish(msg_robot2);
-    ros::Duration(0.01).sleep();
-    pub.publish(msg_robot3);
-    ros::Duration(0.01).sleep();
+    robot_controller::aruco_msg msg;
+    for(auto i : Subject->Robots){
+        msg.robotName = i.Name;
+        msg.linear.x = i.ControlV;
+        msg.yaw = i.ControlYaw;
+        pub.publish(msg);
+        ros::Duration(0.001).sleep();
+    }
 }
