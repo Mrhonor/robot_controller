@@ -5,14 +5,21 @@
 
 //cpp
 #include <thread>
+#include <cmath>
 
 using namespace std;
 
-#define FURRENCY 50.f
+#define FURRENCY 100.f
 #define PI       3.1415926535
 
 controller::controller(ros::NodeHandle &n){
     ROS_INFO("controller init");
+
+    TurningPoint p;
+    p.x = 5;
+    p.y = 5;
+    p.boundaryLength = 0.5;
+    CrossRoad.push_back(p);
 
     Subscriber = new controller_subscriber(n, this);
 
@@ -32,6 +39,7 @@ void controller::controller_process(){
     while(ros::ok()){
 		lck.lock();
 
+        // control the robots
         for(auto &i : Robots){
             OnControl(i);
         }
@@ -44,14 +52,68 @@ void controller::controller_process(){
 }
 
 void controller::OnControl(RobotInfo& selfInfo){
-    if(fabsf(selfInfo.x - selfInfo.TargetX) <= 0.01 && fabsf(selfInfo.y - selfInfo.TargetY) <= 0.01){
+    if(fabs(selfInfo.x - selfInfo.TargetX) <= 0.2 && fabs(selfInfo.y - selfInfo.TargetY) <= 0.2){
         selfInfo.TargetX = 100;
     }
 
+    bool CanPassTheCrossRoad = true;
+    for(auto &p : CrossRoad){
+        if(p.IsWithingTuringPoints(&selfInfo)){
+            ROS_INFO("1");
+            if (p.IsWithingWaitQuene(&selfInfo))
+            {
+                ROS_INFO("2");
+                // if the robot isn't the first one in the vector, it can't pass
+                if(p.WaitQuene[0] != &selfInfo){
+                    ROS_INFO("3");
+                    if (!p.IsWithingTuringPoints(p.WaitQuene[0]))
+                    {
+                        // if the first one is get out of cross road, it should be clear
+                        p.WaitQuene.erase(p.WaitQuene.begin());
+                    }
+
+                    
+                    CanPassTheCrossRoad = false;
+                }
+            }
+            else
+            {
+                p.WaitQuene.push_back(&selfInfo);
+                CanPassTheCrossRoad = false;
+            }
+            
+        }
+    }
+
     selfInfo.ControlYaw = atan2(selfInfo.TargetY - selfInfo.y, selfInfo.TargetX - selfInfo.x) / PI * 180.0;
-    ROS_INFO_STREAM(selfInfo.Name << " ControlYaw: " << selfInfo.ControlYaw);
-    if(fabsf(selfInfo.ControlYaw - selfInfo.yaw) < 0.1){
-        selfInfo.ControlV = 1;
+
+
+    if(fabs(selfInfo.ControlYaw - selfInfo.yaw) < 15 && CanPassTheCrossRoad){
+        //search others to follow
+        double MinDistance = -1;
+        for(auto i : Robots){
+            if(i.Name != selfInfo.Name && fabs(i.yaw - selfInfo.yaw) < 10){
+                double Distance = sqrt(pow((i.x -selfInfo.x), 2) + pow(i.y - selfInfo.y, 2));
+                if(MinDistance == -1){
+                    MinDistance = Distance;
+                }
+                else
+                {
+                    MinDistance = (MinDistance < Distance) ? MinDistance : Distance;
+                }
+                
+            }
+        }
+        if (MinDistance > 1.2)
+        {
+            selfInfo.ControlV = 0.7;
+        }
+        else
+        {
+            selfInfo.ControlV = 0.5;
+        }
+        
+        
     }
     else
     {

@@ -21,6 +21,6 @@ void controller_publisher::PublishAll(){
         msg.linear.x = i.ControlV;
         msg.yaw = i.ControlYaw;
         pub.publish(msg);
-        ros::Duration(0.001).sleep();
+        // ros::Duration(0.001).sleep();
     }
 }

@@ -25,6 +25,34 @@ typedef struct
     double ControlYaw = 0;
 }RobotInfo;
 
+typedef struct
+{
+    double x;
+    double y;
+    double boundaryLength;
+    std::vector<RobotInfo*> WaitQuene;
+    bool IsWithingTuringPoints(RobotInfo* info){
+        if(fabs(info->x - x) < boundaryLength && fabs(info->y- y) < boundaryLength){
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+        
+    }
+
+    bool IsWithingWaitQuene(RobotInfo* info){
+        for (auto &i : WaitQuene)
+        {
+            if(i == info){
+                return true;
+            }
+        }
+        return false;
+    }
+}TurningPoint;
+
 
 class controller
 {
@@ -32,7 +60,7 @@ public:
     std::mutex controller_process_lock;
 
     std::vector<RobotInfo> Robots;
-
+    std::vector<TurningPoint> CrossRoad;
 
 private:
     /* data */
