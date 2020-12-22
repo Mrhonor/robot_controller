@@ -11,7 +11,7 @@
 class controller_subscriber;
 class controller_publisher;
 
-typedef struct
+typedef struct RobotInfo
 {
     std::string Name;
     double x = 0;
@@ -23,6 +23,8 @@ typedef struct
     double TargetY = 0;
     double ControlV = 0;
     double ControlYaw = 0;
+
+    struct RobotInfo* Following = nullptr;
 }RobotInfo;
 
 typedef struct
@@ -32,7 +34,7 @@ typedef struct
     double boundaryLength;
     std::vector<RobotInfo*> WaitQuene;
     bool IsWithingTuringPoints(RobotInfo* info){
-        if(fabs(info->x - x) < boundaryLength && fabs(info->y- y) < boundaryLength){
+        if(fabs(info->x - x) < boundaryLength && fabs(info->y - y) < boundaryLength){
             return true;
         }
         else
