@@ -52,7 +52,7 @@ void controller::controller_process(){
 }
 
 void controller::OnControl(RobotInfo& selfInfo){
-    if(fabs(selfInfo.x - selfInfo.TargetX) <= 0.1 && fabs(selfInfo.y - selfInfo.TargetY) <= 0.1){
+    if(fabs(selfInfo.x - selfInfo.TargetX) <= 0.15 && fabs(selfInfo.y - selfInfo.TargetY) <= 0.15){
         selfInfo.TargetX = 100;
     }
 
